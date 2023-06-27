@@ -1,0 +1,92 @@
+package com.wileyedge.finalcourseproject.controller;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.wileyedge.finalcourseproject.Service.IService;
+import com.wileyedge.finalcourseproject.exceptions.EmissionInvalidException;
+import com.wileyedge.finalcourseproject.exceptions.RegistrationFailedException;
+import com.wileyedge.finalcourseproject.exceptions.UserNotFoundException;
+import com.wileyedge.finalcourseproject.model.CarbonConsumption;
+import com.wileyedge.finalcourseproject.model.User;
+
+@RestController
+@CrossOrigin(origins = "*")
+public class Controller {
+
+	@Autowired
+	private IService service;
+	
+	@PostMapping(path = "/register", consumes = "application/json")
+	public String register(@RequestBody User user) throws RegistrationFailedException {
+		return service.register(user);
+	}
+	
+	@PostMapping(path = "/login", consumes = "application/json")
+	public String login(@RequestBody Map<String, String> credentials) throws UserNotFoundException {
+		System.out.println(credentials);
+		return service.login(credentials);
+	}
+	
+	@GetMapping(path = "/profile/{username}")
+	public User getUserProfile(@PathVariable String username) throws UserNotFoundException {
+		return service.getUserProfile(username);
+	}
+	
+	@PostMapping(path = "/profile/edit/{username}", consumes = "application/json")
+	public void editUserProfile(@PathVariable String username, @RequestBody User newInfo) throws UserNotFoundException {
+		service.editUserProfile(username, newInfo);
+	}
+	
+	@GetMapping(path = "/activities/{username}/{date}")
+	public List<Map<String, String>> getActivitiesOnDay(@PathVariable String username, @PathVariable @DateTimeFormat(pattern= "yyyy-MM-dd") Date date) throws UserNotFoundException {
+		return service.getActivitiesOnDay(username, date);
+	}
+	
+	@GetMapping(path = "/emissions/{username}/{dateStart}/{dateEnd}")
+	public Map<String, Object> getEmissionsDuringPeriod(@PathVariable String username, 
+			@PathVariable @DateTimeFormat(pattern= "yyyy-MM-dd") Date dateStart, @PathVariable @DateTimeFormat(pattern= "yyyy-MM-dd") Date dateEnd) throws UserNotFoundException {
+		return service.getEmissionsDuringPeriod(username, dateStart, dateEnd);
+	}
+	
+	
+	@PostMapping(path = "/emissions/{username}", consumes = "application/json")
+	public void addNewEmissionsEntry(@PathVariable String username, @RequestBody CarbonConsumption entry) throws EmissionInvalidException {
+		service.addNewEmissionsEntry(username, entry);
+	}
+	
+	/*
+	@GetMapping(path = "/users")
+	public List<User> fetchAllUsers(){
+		System.out.println("Inside fetchAllUsers() of Controller");
+		List<User> users = service.retrieveAllUsers();
+		return users;		
+	}
+	
+	@PostMapping(path="/users")
+	public User createUser(@Valid @RequestBody User user) {	
+		System.out.println("Inside createUser");
+		User u = service.save(user);
+		return u;
+	}
+	
+	@PostMapping(path="/activities/{user_id}/{date}")
+	public User listOfActivities(@Valid @RequestBody User user, @RequestBody Date date) {	
+		System.out.println("Inside createUser");
+		User u = service.save(user);
+		return u;
+	}	
+	*/
+	
+}
